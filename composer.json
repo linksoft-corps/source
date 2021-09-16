@@ -1,5 +1,5 @@
 {
-    "name": "linksoft/market",
+    "name": "linksoft/source",
     "license": "MIT",
     "type": "linksoft-plugin",
     "description": "Market Data for SourceData",
@@ -37,7 +37,7 @@
             "dev-master": "1.0-dev"
         },
         "hyperf": {
-            "config": "Hyperf\\Consul\\ConfigProvider"
+            "config": "LinkSoft\\Source\\ConfigProvider"
         }
     }
 }
