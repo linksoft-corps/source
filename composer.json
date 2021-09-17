@@ -15,9 +15,8 @@
     ],
     "require": {
         "php": ">=7.3.0",
-        "hyperf/cache": "^2.2",
         "hyperf/guzzle": "~2.2.0",
-        "psr/log": "^1.0|^2.0"
+        "psr/log": "^1.0"
     },
     "config": {
         "sort-packages": true

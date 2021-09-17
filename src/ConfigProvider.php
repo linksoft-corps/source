@@ -18,6 +18,7 @@ class ConfigProvider
     {
         return [
             'dependencies' => [
+                SourceData::class => SourceData::class,
             ],
             'annotations' => [
                 'scan' => [

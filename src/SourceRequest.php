@@ -12,20 +12,18 @@ declare(strict_types=1);
 
 namespace LinkSoft\Source;
 
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\TransferException;
-use Hyperf\Consul\SourceResponse;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Guzzle\ClientFactory;
-use Hyperf\Guzzle\HandlerStackFactory;
+use Hyperf\Logger\LoggerFactory;
 use Hyperf\Utils\Codec\Json;
 use LinkSoft\Source\Exception\ClientException;
 use LinkSoft\Source\Exception\ServerException;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 
-abstract class Client
+class SourceRequest
 {
     /**
      * @var \GuzzleHttp\Client
@@ -33,26 +31,24 @@ abstract class Client
     private $client;
 
     /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
      * @var ConfigInterface
      */
     private $config;
 
-    public function __construct(ConfigInterface $config, LoggerInterface $logger = null)
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    public function __construct(ContainerInterface $container)
     {
-        $factory = new HandlerStackFactory();
-        $stack = $factory->create();
-        $this->client = make(Client::class, [
-            'config' => [
-                'handler' => $stack,
-            ],
-        ]);
-        $this->logger = $logger ?: new NullLogger();
+        $config = $container->get(ConfigInterface::class);
+        if (!$config->has('source')) {
+            throw new \InvalidArgumentException(sprintf('config[%s] is not exist!', $key));
+        }
+        $this->logger = $container->get(LoggerFactory::class)->get('source');
         $this->config = $config->get('source');
+        $this->client = $container->get(ClientFactory::class)->create();
     }
 
     /**
@@ -62,18 +58,14 @@ abstract class Client
      * @param array $options
      * @return SourceResponse
      */
-    protected function request(string $method, string $route, array $options = []): SourceResponse
+    public function request(string $method, string $route, array $options = []): SourceResponse
     {
         $url = $this->config['domain'] . '/' . $route;
-        if (isset($options['body'])) {
-            $options['body'] = array_merge($options['body'], ['appId' => $this->config['sourceId'] ?? '', 'appSecret' => $this->config['sourceKey'] ?? '']);
-        } else {
-            $options['body'] = ['appId' => $this->config['sourceId'] ?? '', 'appSecret' => $this->config['sourceKey'] ?? ''];
-        }
+        $param = [];
+        $param['form_params'] = array_merge(['appId' => $this->config['sourceId'] ?? '', 'appSecret' => $this->config['sourceKey'] ?? ''], $options);
         $this->logger->debug(sprintf('Request Source [%s] %s param %s', strtoupper($method), $url, Json::encode($options)));
         try {
-            // Create a HTTP Client by $clientFactory closure.
-            $response = $this->client->request($method, $url, $options);
+            $response = $this->client->request($method, $url, $param);
         } catch (TransferException $exception) {
             $message = sprintf('Something went wrong when calling source (%s).', $exception->getMessage());
             $this->logger->error($message);
@@ -81,6 +73,7 @@ abstract class Client
         } catch (GuzzleException $exception) {
             $message = sprintf('Something went wrong when calling source (%s).', $exception->getMessage());
             $this->logger->error($message);
+            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
         }
         if ($response->getStatusCode() >= 400) {
             $message = sprintf('Something went wrong when calling source (%s - %s).', $response->getStatusCode(), $response->getReasonPhrase());

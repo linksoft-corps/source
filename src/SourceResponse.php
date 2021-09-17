@@ -9,7 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-namespace Hyperf\Consul;
+namespace LinkSoft\Source;
 
 use Hyperf\Utils\Codec\Json;
 use Psr\Http\Message\ResponseInterface;
