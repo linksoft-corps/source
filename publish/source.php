@@ -12,5 +12,5 @@ declare(strict_types=1);
 return [
     'domain' => env('SOURCE_DOMAIN', 'localhost'),
     'sourceId' => env('SOURCE_ID', 'guest'),
-    'sourceKey' => env('SOURCE_Key', 'guest'),
+    'sourceKey' => env('SOURCE_KEY', 'guest'),
 ];

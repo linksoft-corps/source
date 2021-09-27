@@ -1,1 +1,1 @@
-<?phprequire_once __DIR__ . '/../vendor/autoload.php';use LinkSoft\Source\SourceData;$sourceData = make(SourceData::class);var_dump($sourceData->detail('HKEX|1|00001', 'zh-CN'));
+<?phprequire_once __DIR__ . '/../vendor/autoload.php';use LinkSoft\Source\SourceData;$sourceData = make(SourceData::class);var_dump($sourceData->news('HKEX', '00001', 1, 10));
