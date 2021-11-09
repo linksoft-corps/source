@@ -15,8 +15,8 @@ namespace LinkSoft\Source;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\TransferException;
 use Hyperf\Contract\ConfigInterface;
+use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Guzzle\ClientFactory;
-use Hyperf\Logger\LoggerFactory;
 use Hyperf\Utils\Codec\Json;
 use LinkSoft\Source\Exception\ClientException;
 use LinkSoft\Source\Exception\ServerException;
@@ -44,9 +44,9 @@ class SourceRequest
     {
         $config = $container->get(ConfigInterface::class);
         if (!$config->has('source')) {
-            throw new \InvalidArgumentException(sprintf('config[%s] is not exist!', $key));
+            throw new \InvalidArgumentException(sprintf('config[%s] is not exist!', 'source'));
         }
-        $this->logger = $container->get(LoggerFactory::class)->get('source');
+        $this->logger = $container->get(StdoutLoggerInterface::class);
         $this->config = $config->get('source');
         $this->client = $container->get(ClientFactory::class)->create();
     }
