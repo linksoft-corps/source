@@ -13,12 +13,11 @@ declare(strict_types=1);
 namespace LinkSoft\Source;
 
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\TransferException;
+use GuzzleHttp\Exception\ClientException;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Guzzle\ClientFactory;
 use Hyperf\Utils\Codec\Json;
-use LinkSoft\Source\Exception\ClientException;
 use LinkSoft\Source\Exception\ServerException;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
@@ -66,7 +65,7 @@ class SourceRequest
         $this->logger->debug(sprintf('Request Source [%s] %s param %s', strtoupper($method), $url, Json::encode($options)));
         try {
             $response = $this->client->request($method, $url, $param);
-        } catch (TransferException $exception) {
+        } catch (ClientException $exception) {
             $message = sprintf('Something went wrong when calling source (%s).', $exception->getMessage());
             $this->logger->error($message);
             throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
@@ -74,15 +73,6 @@ class SourceRequest
             $message = sprintf('Something went wrong when calling source (%s).', $exception->getMessage());
             $this->logger->error($message);
             throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
-        }
-        if ($response->getStatusCode() >= 400) {
-            $message = sprintf('Something went wrong when calling source (%s - %s).', $response->getStatusCode(), $response->getReasonPhrase());
-            $this->logger->error($message);
-            $message .= PHP_EOL . (string)$response->getBody();
-            if ($response->getStatusCode() >= 500) {
-                throw new ServerException($message, $response->getStatusCode());
-            }
-            throw new ClientException($message, $response->getStatusCode());
         }
         return new SourceResponse($response);
     }

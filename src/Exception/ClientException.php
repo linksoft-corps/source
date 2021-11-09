@@ -1,1 +1,0 @@
-<?phpnamespace LinkSoft\Source\Exception;class ClientException extends \RuntimeException{}
