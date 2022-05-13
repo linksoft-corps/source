@@ -66,10 +66,10 @@ class SourceRequest
         try {
             $response = $this->client->request($method, $url, $param);
         } catch (ClientException $exception) {
-            $this->logger->error(sprintf('Request Source [%s] %s param %s Something went wrong when calling source (%s).', strtoupper($method), $url, Json::encode($options), $exception->getMessage()));
+            $this->logger->error(sprintf('[%sms]Request Source [%s] %s param %s Something went wrong when calling source (%s).', intval(microtime(true) * 1000 - $startTime), strtoupper($method), $url, Json::encode($options), $exception->getMessage()));
             throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
         } catch (GuzzleException $exception) {
-            $this->logger->error(sprintf('Request Source [%s] %s param %s Something went wrong when calling source (%s).', strtoupper($method), $url, Json::encode($options), $exception->getMessage()));
+            $this->logger->error(sprintf('[%sms]Request Source [%s] %s param %s Something went wrong when calling source (%s).', intval(microtime(true) * 1000 - $startTime), strtoupper($method), $url, Json::encode($options), $exception->getMessage()));
             throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
         }
         $this->logger->info(sprintf('[%sms]Request Source [%s] %s param %s', intval(microtime(true) * 1000 - $startTime), strtoupper($method), $url, Json::encode($options)));
