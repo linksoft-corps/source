@@ -59,21 +59,20 @@ class SourceRequest
      */
     public function request(string $method, string $route, array $options = []): SourceResponse
     {
+        $startTime = microtime(true) * 1000;
         $url = $this->config['domain'] . '/' . $route;
         $param = [];
         $param['form_params'] = array_merge(['appId' => $this->config['sourceId'] ?? '', 'appSecret' => $this->config['sourceKey'] ?? ''], $options);
-        $this->logger->debug(sprintf('Request Source [%s] %s param %s', strtoupper($method), $url, Json::encode($options)));
         try {
             $response = $this->client->request($method, $url, $param);
         } catch (ClientException $exception) {
-            $message = sprintf('Something went wrong when calling source (%s).', $exception->getMessage());
-            $this->logger->error($message);
+            $this->logger->error(sprintf('Request Source [%s] %s param %s Something went wrong when calling source (%s).', strtoupper($method), $url, Json::encode($options), $exception->getMessage()));
             throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
         } catch (GuzzleException $exception) {
-            $message = sprintf('Something went wrong when calling source (%s).', $exception->getMessage());
-            $this->logger->error($message);
+            $this->logger->error(sprintf('Request Source [%s] %s param %s Something went wrong when calling source (%s).', strtoupper($method), $url, Json::encode($options), $exception->getMessage()));
             throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
         }
+        $this->logger->info(sprintf('[%s ms]Request Source [%s] %s param %s', intval(microtime(true) * 1000 - $startTime), strtoupper($method), $url, Json::encode($options)));
         return new SourceResponse($response);
     }
 }
